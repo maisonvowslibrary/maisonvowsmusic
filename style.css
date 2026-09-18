@@ -210,3 +210,6 @@ form input:focus, form textarea:focus { border-color:var(--accent); }
   .form-grid { grid-template-columns:1fr; }
   .footer { padding:17px 22px 25px; flex-direction:column; }
 }
+
+.toast { position:fixed; left:50%; bottom:28px; transform:translate(-50%,18px); z-index:50; opacity:0; pointer-events:none; background:var(--text); color:var(--bg); border-radius:12px; padding:12px 16px; font-size:13px; font-weight:800; box-shadow:0 18px 45px rgba(0,0,0,.28); transition:opacity .18s ease, transform .18s ease; }
+.toast.show { opacity:1; transform:translate(-50%,0); }

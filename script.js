@@ -1,30 +1,50 @@
 const STORAGE_KEY = "kk-music-vault-v2";
 const THEME_KEY = "kk-music-vault-theme";
 
+function makeId() {
+  if (globalThis.crypto && typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  return "track-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+}
+
+function showToast(message) {
+  let toast = document.getElementById("toast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "toast";
+    toast.className = "toast";
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.classList.add("show");
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
+}
+
+
 const defaultMusic = [
   {
-    id: crypto.randomUUID(), title: "Kesariya", artist: "Arijit Singh",
+    id: makeId(), title: "Kesariya", artist: "Arijit Singh",
     album: "Brahmāstra", category: "Bollywood",
     url: "https://www.youtube.com/results?search_query=Kesariya+Arijit+Singh",
     art: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=900&q=80",
     note: "", favorite: true, createdAt: Date.now() - 5000
   },
   {
-    id: crypto.randomUUID(), title: "Insane", artist: "AP Dhillon",
+    id: makeId(), title: "Insane", artist: "AP Dhillon",
     album: "", category: "Punjabi",
     url: "https://www.youtube.com/results?search_query=AP+Dhillon+Insane",
     art: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=80",
     note: "", favorite: false, createdAt: Date.now() - 4000
   },
   {
-    id: crypto.randomUUID(), title: "A Moment Apart", artist: "ODESZA",
+    id: makeId(), title: "A Moment Apart", artist: "ODESZA",
     album: "A Moment Apart", category: "Electronic",
     url: "https://open.spotify.com/search/A%20Moment%20Apart%20ODESZA",
     art: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=900&q=80",
     note: "", favorite: false, createdAt: Date.now() - 3000
   },
   {
-    id: crypto.randomUUID(), title: "lofi radio", artist: "Lofi Girl",
+    id: makeId(), title: "lofi radio", artist: "Lofi Girl",
     album: "", category: "Lo-Fi",
     url: "https://www.youtube.com/@LofiGirl",
     art: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=900&q=80",
@@ -178,7 +198,6 @@ function closeAllModals() {
   document.getElementById("exportModal").hidden = true;
   document.getElementById("overlay").hidden = true;
 }
-
 function closeModal() {
   document.getElementById("musicModal").hidden = true;
   document.getElementById("overlay").hidden = true;
@@ -203,24 +222,31 @@ function closeExport() {
 
 document.getElementById("musicForm").addEventListener("submit", event => {
   event.preventDefault();
-  const data = Object.fromEntries(new FormData(event.target).entries());
-  music.unshift({
-    id: crypto.randomUUID(),
-    title: data.title.trim(),
-    artist: data.artist.trim(),
-    album: data.album.trim(),
-    category: data.category.trim(),
-    url: data.url.trim(),
-    art: data.art.trim(),
-    note: data.note.trim(),
-    favorite: false,
-    createdAt: Date.now()
-  });
-  saveMusic();
-  closeModal();
-  state.view = "all";
-  state.category = "All";
-  render();
+  try {
+    const data = Object.fromEntries(new FormData(event.target).entries());
+    const track = {
+      id: makeId(),
+      title: data.title.trim(),
+      artist: data.artist.trim(),
+      album: data.album.trim(),
+      category: data.category.trim(),
+      url: data.url.trim(),
+      art: data.art.trim(),
+      note: data.note.trim(),
+      favorite: false,
+      createdAt: Date.now()
+    };
+    music.unshift(track);
+    saveMusic();
+    closeModal();
+    state.view = "all";
+    state.category = "All";
+    render();
+    showToast(`Saved “${track.title}” to your library.`);
+  } catch (error) {
+    console.error(error);
+    alert("The track could not be saved. Please refresh the page and try again.");
+  }
 });
 
 document.getElementById("searchInput").addEventListener("input", e => {
