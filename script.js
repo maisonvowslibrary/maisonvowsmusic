@@ -48,6 +48,64 @@ function saveMusic() {
   }
 }
 
+
+function compressPoster(file) {
+  return new Promise((resolve, reject) => {
+    if (!file) return resolve("");
+    if (!file.type.startsWith("image/")) {
+      reject(new Error("Poster must be an image file."));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Could not read poster."));
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const maxSide = 700;
+        const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(img.width * scale));
+        canvas.height = Math.max(1, Math.round(img.height * scale));
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.78));
+      };
+      img.onerror = () => reject(new Error("Could not decode poster."));
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function clearPosterPreview() {
+  const input = document.getElementById("posterFile");
+  const preview = document.getElementById("posterPreview");
+  const image = document.getElementById("posterPreviewImg");
+  input.value = "";
+  image.removeAttribute("src");
+  preview.hidden = true;
+}
+
+document.getElementById("posterFile").addEventListener("change", async event => {
+  const file = event.target.files[0];
+  const preview = document.getElementById("posterPreview");
+  const image = document.getElementById("posterPreviewImg");
+  if (!file) {
+    preview.hidden = true;
+    return;
+  }
+  try {
+    const dataUrl = await compressPoster(file);
+    image.src = dataUrl;
+    preview.hidden = false;
+  } catch (error) {
+    event.target.value = "";
+    preview.hidden = true;
+    alert(error.message);
+  }
+});
+
 function categories() {
   return [...new Set(music.map(x => x.category).filter(Boolean))].sort((a,b) => a.localeCompare(b));
 }
@@ -182,6 +240,7 @@ function closeModal() {
   document.getElementById("musicModal").hidden = true;
   document.getElementById("overlay").hidden = true;
   document.getElementById("musicForm").reset();
+  clearPosterPreview();
 }
 function openHelp() {
   document.getElementById("overlay").hidden = false;
@@ -200,10 +259,13 @@ function closeExport() {
   document.getElementById("overlay").hidden = true;
 }
 
-document.getElementById("musicForm").addEventListener("submit", event => {
+document.getElementById("musicForm").addEventListener("submit", async event => {
   event.preventDefault();
   try {
     const data = Object.fromEntries(new FormData(event.target).entries());
+    const posterFile = document.getElementById("posterFile").files[0];
+    const uploadedPoster = await compressPoster(posterFile);
+
     const track = {
       id: makeId(),
       title: data.title.trim(),
@@ -211,16 +273,18 @@ document.getElementById("musicForm").addEventListener("submit", event => {
       album: data.album.trim(),
       category: data.category.trim(),
       url: data.url.trim(),
-      art: data.art.trim(),
+      art: uploadedPoster || data.art.trim(),
       note: data.note.trim(),
       favorite: false,
       createdAt: Date.now()
     };
+
     music.unshift(track);
     if (!saveMusic()) {
       music.shift();
-      throw new Error("Browser storage unavailable");
+      throw new Error("Browser storage is full or unavailable. Remove a few old tracks/posters and try again.");
     }
+
     closeModal();
     state.view = "all";
     state.category = "All";
@@ -230,7 +294,7 @@ document.getElementById("musicForm").addEventListener("submit", event => {
     showToast(`Saved “${track.title}” to your library.`);
   } catch (error) {
     console.error(error);
-    alert("The track could not be saved. Please make sure site storage is allowed in Chrome, then refresh the page and try again.");
+    alert(error.message || "The track could not be saved.");
   }
 });
 

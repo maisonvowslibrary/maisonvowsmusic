@@ -152,9 +152,18 @@
           Music link *
           <input name="url" type="url" required placeholder="https://youtube.com/... or https://open.spotify.com/..." />
         </label>
+        <label class="poster-label">
+          Poster / artwork
+          <input id="posterFile" name="poster" type="file" accept="image/png,image/jpeg,image/webp,image/gif" />
+          <span class="file-help">Choose a poster from your computer. JPG, PNG or WEBP recommended.</span>
+          <div id="posterPreview" class="poster-preview" hidden>
+            <img id="posterPreviewImg" alt="Poster preview" />
+            <button type="button" class="remove-poster" onclick="clearPosterPreview()">Remove</button>
+          </div>
+        </label>
         <label>
-          Album artwork URL
-          <input name="art" type="url" placeholder="Optional image URL (jpg/png/webp)" />
+          Or paste poster image URL
+          <input name="art" type="url" placeholder="Optional image URL" />
         </label>
         <label>
           Note

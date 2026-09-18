@@ -213,3 +213,43 @@ form input:focus, form textarea:focus { border-color:var(--accent); }
 
 .toast { position:fixed; left:50%; bottom:28px; transform:translate(-50%,18px); z-index:50; opacity:0; pointer-events:none; background:var(--text); color:var(--bg); border-radius:12px; padding:12px 16px; font-size:13px; font-weight:800; box-shadow:0 18px 45px rgba(0,0,0,.28); transition:opacity .18s ease, transform .18s ease; }
 .toast.show { opacity:1; transform:translate(-50%,0); }
+
+.poster-label input[type="file"] {
+  padding: 10px;
+  cursor: pointer;
+}
+.file-help {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+.poster-preview {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.poster-preview img {
+  width: 70px;
+  height: 70px;
+  border-radius: 9px;
+  object-fit: cover;
+}
+.remove-poster {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  border-radius: 9px;
+  padding: 8px 11px;
+  cursor: pointer;
+}
+.remove-poster:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
