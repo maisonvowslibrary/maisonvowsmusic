@@ -217,15 +217,20 @@ document.getElementById("musicForm").addEventListener("submit", event => {
       createdAt: Date.now()
     };
     music.unshift(track);
-    saveMusic();
+    if (!saveMusic()) {
+      music.shift();
+      throw new Error("Browser storage unavailable");
+    }
     closeModal();
     state.view = "all";
     state.category = "All";
+    state.search = "";
+    document.getElementById("searchInput").value = "";
     render();
     showToast(`Saved “${track.title}” to your library.`);
   } catch (error) {
     console.error(error);
-    alert("The track could not be saved. Please refresh the page and try again.");
+    alert("The track could not be saved. Please make sure site storage is allowed in Chrome, then refresh the page and try again.");
   }
 });
 
@@ -307,6 +312,13 @@ function escapeAttr(value) { return escapeHtml(value).replace(/`/g, "&#096;"); }
 function safeAttrUrl(url) {
   const value = String(url || "");
   return /^https?:\/\//i.test(value) ? value.replace(/"/g, "%22") : "#";
+}
+
+
+function render() {
+  renderSidebar();
+  renderStats();
+  renderMusic();
 }
 
 (function init() {
