@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Music Vault</title>
+  <meta name="description" content="My personal music library." />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">♪</div>
+        <div>
+          <strong>My Music Vault</strong>
+          <span>Your personal library</span>
+        </div>
+      </div>
+
+      <button class="add-btn sidebar-add" onclick="openModal()">
+        <span>＋</span> Add Music
+      </button>
+
+      <nav class="side-nav">
+        <button class="side-link active" data-view="all" onclick="setView('all')">
+          <span>♫</span> All Music
+          <b id="allCount">0</b>
+        </button>
+        <button class="side-link" data-view="favorites" onclick="setView('favorites')">
+          <span>♡</span> Favorites
+          <b id="favCount">0</b>
+        </button>
+      </nav>
+
+      <div class="side-section">
+        <div class="section-label">Categories</div>
+        <div id="sidebarCategories"></div>
+      </div>
+
+      <div class="sidebar-bottom">
+        <button class="side-link" onclick="toggleTheme()">
+          <span id="themeIcon">◐</span> <span id="themeLabel">Light mode</span>
+        </button>
+        <button class="side-link" onclick="openHelp()">
+          <span>?</span> How it works
+        </button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="mobile-brand">
+          <div class="brand-mark">♪</div>
+          <strong>My Music Vault</strong>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn mobile-only" onclick="toggleSidebar()" aria-label="Open menu">☰</button>
+          <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle theme">◐</button>
+          <button class="add-btn compact" onclick="openModal()">＋ Add Music</button>
+        </div>
+      </header>
+
+      <section class="hero">
+        <div>
+          <p class="eyebrow">PERSONAL MUSIC LIBRARY</p>
+          <h1>Keep every favorite<br /><em>one tap away.</em></h1>
+          <p class="hero-copy">Save music links, sort them into categories, and keep your collection beautifully organized.</p>
+        </div>
+        <div class="hero-stats">
+          <div><strong id="heroTotal">0</strong><span>Tracks</span></div>
+          <div><strong id="heroCategories">0</strong><span>Categories</span></div>
+          <div><strong id="heroFavorites">0</strong><span>Favorites</span></div>
+        </div>
+      </section>
+
+      <section class="content">
+        <div class="toolbar">
+          <div class="search">
+            <span>⌕</span>
+            <input id="searchInput" type="search" placeholder="Search songs, artists, albums..." />
+          </div>
+          <div class="toolbar-right">
+            <select id="sortSelect" aria-label="Sort songs">
+              <option value="recent">Recently added</option>
+              <option value="title">Title A–Z</option>
+              <option value="artist">Artist A–Z</option>
+              <option value="category">Category</option>
+            </select>
+            <button class="filter-btn" onclick="clearFilters()">Clear</button>
+          </div>
+        </div>
+
+        <div class="mobile-cats" id="mobileCategories"></div>
+
+        <div class="section-heading">
+          <div>
+            <span class="section-kicker" id="viewLabel">ALL MUSIC</span>
+            <h2 id="resultsTitle">Your collection</h2>
+          </div>
+          <span class="results-count" id="resultsCount">0 tracks</span>
+        </div>
+
+        <div id="musicGrid" class="music-grid"></div>
+        <div id="emptyState" class="empty-state" hidden>
+          <div class="empty-icon">♫</div>
+          <h3>No music here yet</h3>
+          <p>Add a song or change your search/filter.</p>
+          <button class="add-btn" onclick="openModal()">＋ Add your first track</button>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>Your links stay in this browser using local storage.</span>
+        <button onclick="openExport()">Export / backup</button>
+      </footer>
+    </main>
+  </div>
+
+  <div id="overlay" class="overlay" hidden></div>
+
+  <div id="musicModal" class="modal" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">LIBRARY</p>
+          <h2>Add music</h2>
+        </div>
+        <button class="close-btn" onclick="closeModal()">×</button>
+      </div>
+      <form id="musicForm">
+        <div class="form-grid">
+          <label>
+            Song title *
+            <input name="title" required placeholder="e.g. Kesariya" />
+          </label>
+          <label>
+            Artist
+            <input name="artist" placeholder="e.g. Arijit Singh" />
+          </label>
+          <label>
+            Album
+            <input name="album" placeholder="Optional album name" />
+          </label>
+          <label>
+            Category *
+            <input name="category" required list="categoryList" placeholder="e.g. Bollywood" />
+          </label>
+        </div>
+        <label>
+          Music link *
+          <input name="url" type="url" required placeholder="https://youtube.com/... or https://open.spotify.com/..." />
+        </label>
+        <label>
+          Album artwork URL
+          <input name="art" type="url" placeholder="Optional image URL (jpg/png/webp)" />
+        </label>
+        <label>
+          Note
+          <textarea name="note" rows="3" placeholder="Optional note about this track"></textarea>
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="ghost-btn" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="add-btn">Save music</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="helpModal" class="modal" hidden>
+    <div class="modal-card small">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">WELCOME</p>
+          <h2>How it works</h2>
+        </div>
+        <button class="close-btn" onclick="closeHelp()">×</button>
+      </div>
+      <div class="help-copy">
+        <p><strong>1. Add a track</strong><br />Use “Add Music” and paste your YouTube, Spotify, SoundCloud, Apple Music, or any normal music URL.</p>
+        <p><strong>2. Organize it</strong><br />Type any category you like. Categories appear automatically in the sidebar.</p>
+        <p><strong>3. Favorite it</strong><br />Tap the heart on a card to build your personal favorites list.</p>
+        <p><strong>4. Backup it</strong><br />Use Export / backup at the bottom to download your collection as a JSON file.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="exportModal" class="modal" hidden>
+    <div class="modal-card small">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">BACKUP</p>
+          <h2>Export library</h2>
+        </div>
+        <button class="close-btn" onclick="closeExport()">×</button>
+      </div>
+      <p class="modal-note">Download your music list so you can keep a backup or move it to another browser.</p>
+      <div class="backup-actions">
+        <button class="add-btn" onclick="exportLibrary()">↓ Download backup</button>
+        <label class="import-btn">
+          ↑ Import backup
+          <input id="importInput" type="file" accept=".json,application/json" onchange="importLibrary(event)" />
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <datalist id="categoryList"></datalist>
+  <script src="script.js"></script>
+</body>
+</html>
