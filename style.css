@@ -253,3 +253,6 @@ form input:focus, form textarea:focus { border-color:var(--accent); }
   color: var(--danger);
   border-color: var(--danger);
 }
+
+.cat-side { width:100%; font-size:12px; font-weight:700; }
+.cat-side.active { outline:1px solid rgba(139,124,255,.3); }

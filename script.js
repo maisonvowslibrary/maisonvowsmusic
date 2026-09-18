@@ -23,6 +23,23 @@ function showToast(message) {
 
 const defaultMusic = [];
 
+// Main categories for a wedding-editor music library.
+// Any additional category entered while adding a song is also kept automatically.
+const FIXED_CATEGORIES = [
+  "Bride",
+  "Groom",
+  "Couple",
+  "Haldi",
+  "Mehendi",
+  "Sangeet",
+  "Wedding",
+  "Reception",
+  "Vidaai",
+  "Romantic",
+  "Emotional",
+  "Cinematic"
+];
+
 let music = loadMusic();
 let state = { view: "all", category: "All", search: "", sort: "recent" };
 
@@ -107,7 +124,8 @@ document.getElementById("posterFile").addEventListener("change", async event => 
 });
 
 function categories() {
-  return [...new Set(music.map(x => x.category).filter(Boolean))].sort((a,b) => a.localeCompare(b));
+  const custom = music.map(x => String(x.category || "").trim()).filter(Boolean);
+  return [...new Set([...FIXED_CATEGORIES, ...custom])];
 }
 
 function setView(view) {
@@ -149,15 +167,30 @@ function renderSidebar() {
   const wrapper = document.getElementById("sidebarCategories");
   wrapper.innerHTML = categories().map(cat => {
     const count = music.filter(x => x.category === cat).length;
-    return `<button class="cat-side ${state.category === cat ? "active" : ""}" onclick="setCategory(${JSON.stringify(cat)})"><span>${escapeHtml(cat)}</span><span>${count}</span></button>`;
+    return `<button class="cat-side ${state.category === cat ? "active" : ""}" data-category="${escapeAttr(cat)}">
+      <span>${escapeHtml(cat)}</span><span>${count}</span>
+    </button>`;
   }).join("");
+
   document.getElementById("categoryList").innerHTML = categories().map(cat => `<option value="${escapeHtml(cat)}"></option>`).join("");
 
   const mobile = document.getElementById("mobileCategories");
   mobile.innerHTML = ["All", ...categories()].map(cat =>
-    `<button class="category-btn ${state.category === cat ? "active" : ""}" onclick="setCategory(${JSON.stringify(cat)})">${escapeHtml(cat)}</button>`
+    `<button class="category-btn ${state.category === cat ? "active" : ""}" data-category="${escapeAttr(cat)}">${escapeHtml(cat)}</button>`
   ).join("");
 }
+
+document.getElementById("sidebarCategories").addEventListener("click", event => {
+  const button = event.target.closest("[data-category]");
+  if (!button) return;
+  setCategory(button.dataset.category);
+});
+
+document.getElementById("mobileCategories").addEventListener("click", event => {
+  const button = event.target.closest("[data-category]");
+  if (!button) return;
+  setCategory(button.dataset.category);
+});
 
 function renderStats() {
   const favs = music.filter(x => x.favorite).length;
