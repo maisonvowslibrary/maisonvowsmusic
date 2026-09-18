@@ -1,4 +1,4 @@
-const STORAGE_KEY = "kk-music-vault-v2";
+const STORAGE_KEY = "kk-music-vault-v3";
 const THEME_KEY = "kk-music-vault-theme";
 
 function makeId() {
@@ -21,36 +21,7 @@ function showToast(message) {
 }
 
 
-const defaultMusic = [
-  {
-    id: makeId(), title: "Kesariya", artist: "Arijit Singh",
-    album: "Brahmāstra", category: "Bollywood",
-    url: "https://www.youtube.com/results?search_query=Kesariya+Arijit+Singh",
-    art: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=900&q=80",
-    note: "", favorite: true, createdAt: Date.now() - 5000
-  },
-  {
-    id: makeId(), title: "Insane", artist: "AP Dhillon",
-    album: "", category: "Punjabi",
-    url: "https://www.youtube.com/results?search_query=AP+Dhillon+Insane",
-    art: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=80",
-    note: "", favorite: false, createdAt: Date.now() - 4000
-  },
-  {
-    id: makeId(), title: "A Moment Apart", artist: "ODESZA",
-    album: "A Moment Apart", category: "Electronic",
-    url: "https://open.spotify.com/search/A%20Moment%20Apart%20ODESZA",
-    art: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=900&q=80",
-    note: "", favorite: false, createdAt: Date.now() - 3000
-  },
-  {
-    id: makeId(), title: "lofi radio", artist: "Lofi Girl",
-    album: "", category: "Lo-Fi",
-    url: "https://www.youtube.com/@LofiGirl",
-    art: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=900&q=80",
-    note: "Background music.", favorite: true, createdAt: Date.now() - 2000
-  }
-];
+const defaultMusic = [];
 
 let music = loadMusic();
 let state = { view: "all", category: "All", search: "", sort: "recent" };
@@ -58,14 +29,23 @@ let state = { view: "all", category: "All", search: "", sort: "recent" };
 function loadMusic() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed : [];
+    }
   } catch (_) {}
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultMusic));
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultMusic)); } catch (_) {}
   return [...defaultMusic];
 }
 
 function saveMusic() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(music));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(music));
+    return true;
+  } catch (error) {
+    showToast("Could not save in this browser");
+    return false;
+  }
 }
 
 function categories() {
